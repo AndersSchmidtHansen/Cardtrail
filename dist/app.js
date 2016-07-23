@@ -166,7 +166,7 @@ new Vue({
 
       var request = {
         location: here,
-        radius: '15000',
+        radius: '2000',
         types: ['point_of_interest']
       };
 
