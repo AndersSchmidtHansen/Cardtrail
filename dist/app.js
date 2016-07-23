@@ -13,6 +13,8 @@ new Vue({
     mapURL: null,
     camera: null,
     stream: null,
+    marker: null,
+    map: null,
     cameraOpen: false,
     position: {
       title: 'The Old Pumps'
@@ -104,8 +106,6 @@ new Vue({
     });
     */
 
-    pubs();
-
     function onSuccess(position) {
       var locationMarker = null;
       var MAPTYPE_ID = 'cardtrail';
@@ -120,7 +120,7 @@ new Vue({
       var here = new google.maps.LatLng(vm.lat, vm.lng);
       var infowindow = new google.maps.InfoWindow();
 
-      var map = new google.maps.Map(document.getElementById('Map'), {
+      vm.map = new google.maps.Map(document.getElementById('Map'), {
         center: {
           lat: vm.lat,
           lng: vm.lng,
@@ -140,7 +140,7 @@ new Vue({
         mapTypeControl: false,
         disableDefaultUI: true,
         mapTypeControlOptions: {
-          mapTypeIds: [google.maps.MapTypeId.SATELLITE, MAPTYPE_ID]
+          mapTypeIds: [google.maps.MapTypeId.ROADMAP, MAPTYPE_ID]
         },
         mapTypeId: MAPTYPE_ID
       });
@@ -151,26 +151,26 @@ new Vue({
         name: 'Cardtrail'
       });
 
-      map.mapTypes.set(MAPTYPE_ID, cardtrailMapType);
-      map.setTilt(45);
+      vm.map.mapTypes.set(MAPTYPE_ID, cardtrailMapType);
+      vm.map.setTilt(45);
 
-      var marker = new google.maps.Marker({
+      vm.marker = new google.maps.Marker({
         position: {
           lat: vm.lat,
           lng: vm.lng
         },
-        map: map,
+        map: vm.map,
         icon: vm.icons.base.icon,
         animation: google.maps.Animation.DROP
       });
 
       var request = {
         location: here,
-        radius: '2000',
+        radius: '15000',
         types: ['point_of_interest']
       };
 
-      var service = new google.maps.places.PlacesService(map);
+      var service = new google.maps.places.PlacesService(vm.map);
       service.nearbySearch(request, callback);
 
       function callback(results, status) {
@@ -185,7 +185,7 @@ new Vue({
       function createMarker(place) {
         var placeLoc = place.geometry.location;
         var marker = new google.maps.Marker({
-          map: map,
+          map: vm.map,
           icon: vm.icons.point_of_interest.icon,
           position: place.geometry.location
         });
@@ -196,17 +196,8 @@ new Vue({
         });
       }
 
-      function redraw() {
-        console.info('lat', position.coords.latitude);
-        console.info('lng', position.coords.longitude);
-        map.setCenter({ lat: position.coords.latitude, lng: position.coords.longitude, alt: 0 });
-        marker.setPosition({ lat: position.coords.latitude, lng: position.coords.longitude, alt: 0 });
-      }
-
-      setInterval(redraw, 5000);
-
       // EVENTS
-      google.maps.event.addListener(map, 'tilesloaded', function () {
+      google.maps.event.addListener(vm.map, 'tilesloaded', function () {
         //
       });
     }
@@ -219,24 +210,16 @@ new Vue({
       enableHighAccuracy: true
     });
 
-    function pubs() {
-      var pubnub = PUBNUB.init({
-        publish_key: 'pub-c-e6aba8f0-7ac0-44c6-9790-157af357ac60',
-        subscribe_key: 'sub-c-4be5f3b8-5044-11e6-85a4-0619f8945a4f'
-      });
-
-      pubnub.subscribe({
-        channel: 'mymaps',
-        message: function message(_message, channel) {
-          console.log(_message);
-          lat = _message.lat;
-          lng = _message.lng;
-          redraw();
-        },
-        connect: function connect() {
-          console.log('PubNub Connected');
-        }
-      });
-    }
+    navigator.geolocation.watchPosition(function (position) {
+      var newPoint = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+      vm.marker.setPosition(newPoint);
+      vm.map.setCenter(newPoint);
+    }, function () {
+      //
+    }, {
+      enableHighAccuracy: true,
+      timeout: 5000,
+      maximumAge: 0
+    });
   }
 });
