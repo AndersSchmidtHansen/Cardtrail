@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+  <title>Cardtrail</title>
+  <link href="https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz:400,700" rel="stylesheet">
+  <link rel="stylesheet" href="css/app.css">
+</head>
+<body>
+  <div id="app">
+  <!--
+    <div id="LoadingScreen" class="c-loading-screen" :class="{ 'is-in' : splashOpen }">
+      <div class="c-loading-screen__container">
+        <div class="c-loading-screen__title">Cardtrail</div>
+        <div class="c-loading-screen__payoff">Collect Your World</div>
+        <div class="c-loading-screen__progress-bar">
+          <div id="ProgressBar" class="c-progress"></div>
+        </div>
+      </div>
+    </div>
+    -->
+
+    <div id="Map" class="c-map"></div>
+    <div class="c-card" v-if="cameraOpen" :class="{ 'is-in': cameraOpen }" v-cloak>
+      <div class="c-card__wrapper">
+        <div class="c-card__close" @click="closeCamera">&times;</div>
+        <div class="c-card__details">
+          <span v-text="position.title"></span>
+        </div>
+        <div class="c-card__background" style="background-image:url('http://orig08.deviantart.net/9c5f/f/2014/074/0/9/blank_golden_legendary_hearthstone_card_by_guardians38-d7aba1i.png')"></div>
+        <video id="Camera" class="c-card__viewfinder"></video>
+
+        <button class="c-btn" @click="collect" v-if="cameraOpen">Collect</button>
+        <canvas id="canvas" class="c-card__canvas" width="214" height="175"></canvas>
+      </div>
+    </div>
+  </div>
+  <script src="https://npmcdn.com/vue@1.0.26/dist/vue.min.js"></script>
+  <script src="http://cdn.pubnub.com/pubnub-3.7.1.min.js"></script>
+  <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDIJ955VvDru1Z8dL430OL8KjoJAktP-fI&libraries=places" async defer></script>
+  <script src="./app.js"></script>
+</body>
+</html>
